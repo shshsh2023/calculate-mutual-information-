@@ -1,0 +1,55 @@
+from math import log
+from random import randint
+import re
+
+#产生随机数
+def geneRanNum():
+    a = []
+    num = eval(input("需要产生多少个随机数:"))
+    scope = eval(input("随机数范围，用英文逗号隔开:"))
+    length = scope[1]- scope[0]+1
+    for i in range(num):
+        a.append(randint(scope[0],scope[1]))
+    return a,length,num,scope[0]
+
+#计算概率
+def CalculateProbability(DataSample,length,num,scpoe):
+    p = []
+    for i in range(length):
+        p.append(DataSample.count(scpoe+i)/num)
+    return p
+#统计各数字出现前的数字的频率
+def statisticFrequency(DataSample,scope,length,Probability):
+    FrePro = []
+    Data = [str(i) for i in DataSample]
+    strData = ''.join(Data) #变成字符串
+    for i in range(length):
+        for j in range(length):
+            matchStr = str(scope+i) + str(scope+j)
+            temp = re.findall(matchStr,strData)
+            Fre = len(temp)
+            FrePro.append(Fre/Probability[i])
+    return FrePro
+
+#计算互信息
+def CalculateMutualInfo(dataProbability,Px_y,length):
+    MutualInfo = []
+    for i in range(length):
+        for j in range(length):
+            if(Px_y[i*length+j]!=0 and dataProbability[i]!=0):
+                MutualInfo.append(log(Px_y[i*length+j],2)-log(dataProbability[i],2))
+            else:
+                MutualInfo.append(0)
+    return MutualInfo
+
+def main():
+    a,length,num,scope = geneRanNum()
+    Probability = CalculateProbability(a, length, num, scope)
+    Px_y = statisticFrequency(a,scope,length,Probability)
+    x = CalculateMutualInfo(Probability,Px_y,length)
+    for i in range(length):
+        for j in range(length):
+            print('I(x{};y{})={}bit'.format(scope+i,scope+j,x[i*length+j]))
+
+if __name__ == '__main__':
+    main()
